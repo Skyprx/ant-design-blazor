@@ -19,9 +19,15 @@
   // Fixing https://github.com/ant-design/ant-design/issues/13214
   // It is a render problem of chrome, which is only happened in the codesandbox demo
   // 0.001px solution works and I don't why
-  line-height: @line-height-base;
+  line-height: @btn-line-height;
   .btn;
   .btn-default;
+
+  // Fix loading button animation
+  // https://github.com/ant-design/ant-design/issues/24323
+  > span {
+    display: inline-block;
+  }
 
   &-primary {
     .btn-primary;
@@ -73,6 +79,10 @@
     .btn-link;
   }
 
+  &-text {
+    .btn-text;
+  }
+
   &-dangerous {
     .btn-danger-default;
   }
@@ -85,9 +95,13 @@
     .btn-danger-link;
   }
 
+  &-dangerous&-text {
+    .btn-danger-text;
+  }
+
   &-icon-only {
     .btn-square(@btn-prefix-cls);
-    vertical-align: -0.5px;
+    vertical-align: -1px;
   }
 
   &-round {
@@ -192,12 +206,6 @@
 
   &-background-ghost&-dangerous&-link {
     .button-variant-ghost(@btn-danger-border, transparent);
-  }
-
-  &-background-ghost&-link {
-    .button-variant-ghost(@link-color; transparent);
-
-    color: @btn-link-ghost-color;
   }
 
   &-two-chinese-chars::first-letter {

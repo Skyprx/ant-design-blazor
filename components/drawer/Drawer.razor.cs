@@ -1,9 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Timers;
 using Microsoft.AspNetCore.Components;
 using OneOf;
 
-namespace AntBlazor
+namespace AntDesign
 {
     public partial class Drawer : AntDomComponentBase
     {
@@ -86,12 +88,22 @@ namespace AntBlazor
         public bool Visible
         {
             get => this._isOpen;
-            set => this._isOpen = value;
+            set
+            {
+                if (this._isOpen && !value)
+                {
+                    _isClosing = true;
+                }
+                else
+                {
+                    _isClosing = false;
+                }
+                this._isOpen = value;
+            }
         }
 
-        [Parameter] public EventCallback OnViewInit { get; set; }
-
         [Parameter] public EventCallback OnClose { get; set; }
+        [Parameter] public RenderFragment Handler { get; set; }
 
         private OneOf<RenderFragment, string> _content;
 
@@ -99,6 +111,7 @@ namespace AntBlazor
 
         private RenderFragment ContentTemplate { get; set; }
 
+        private bool _isClosing = false;
         private bool _isOpen = default;
 
         private string _originalPlacement;
@@ -125,11 +138,18 @@ namespace AntBlazor
             }
         }
 
+        private bool _isRenderAnimation = false;
+        private const string Duration = "0.3s";
+        private const string Ease = "cubic-bezier(0.78, 0.14, 0.15, 0.86)";
+        private string _widthTransition = "";
+        private readonly string _transformTransition = $"transform {Duration} {Ease} 0s";
+        private string _heightTransition = "";
+
         private string Transform
         {
             get
             {
-                if (this._isOpen)
+                if (this._isOpen && this._isRenderAnimation)
                 {
                     return null;
                 }
@@ -159,10 +179,9 @@ namespace AntBlazor
             {(Transform != null ? $"transform:{Transform};" : "")}
             {(PlacementChanging ? "transition:none;" : "")}";
 
-        private string DrawerStyle => $@"
-            {(Transform != null ? $"transform:{Transform};" : "")}
-            {(PlacementChanging ? "transition:none;" : "")}
-            z-index:{ZIndex};";
+        private Regex _renderInCurrentContainerRegex = new Regex("position:[\\s]*absolute");
+
+        private string _drawerStyle;
 
         private bool _isPlacementFirstChange = true;
 
@@ -177,7 +196,7 @@ namespace AntBlazor
 
             this.TitleClassMapper.Clear()
                 .If("ant-drawer-header", () => _title.Value != null)
-                .If("ant-drawer-header-no-title", () => _title.Value != null)
+                .If("ant-drawer-header-no-title", () => _title.Value == null)
                 ;
         }
 
@@ -203,7 +222,48 @@ namespace AntBlazor
                 }
             }
 
+            _drawerStyle = "";
+
             base.OnParametersSet();
+        }
+
+        protected override async Task OnAfterRenderAsync(bool isFirst)
+        {
+            if (_isOpen && !NoAnimation)
+            {
+                if (!_isRenderAnimation)
+                {
+                    _isRenderAnimation = true;
+                    CalcDrawerStyle();
+                    await Task.Delay(10);
+
+                    if (string.IsNullOrWhiteSpace(Style))
+                    {
+                        _ = JsInvokeAsync(JSInteropConstants.DisableBodyScroll);
+                    }
+                    else if (!_renderInCurrentContainerRegex.IsMatch(Style))
+                    {
+                        await JsInvokeAsync(JSInteropConstants.DisableBodyScroll);
+                    }
+                    StateHasChanged();
+                }
+                else
+                {
+                    if (!string.IsNullOrWhiteSpace(_drawerStyle))
+                    {
+                        _drawerStyle = "";
+                        StateHasChanged();
+                    }
+                }
+            }
+            else
+            {
+                if (_isClosing)
+                {
+                    await HandleClose(true);
+                }
+            }
+            await base.OnAfterRenderAsync(isFirst);
         }
 
         private Timer _timer;
@@ -232,7 +292,7 @@ namespace AntBlazor
         {
             if (this.MaskClosable && this.Mask && this.OnClose.HasDelegate)
             {
-                await this.OnClose.InvokeAsync(this);
+                await HandleClose();
             }
         }
 
@@ -242,8 +302,62 @@ namespace AntBlazor
             {
                 _timer?.Dispose();
 
-                await OnClose.InvokeAsync(this);
+                await HandleClose();
             }
+        }
+
+        private async Task HandleClose(bool isChangeByParamater = false)
+        {
+            _isRenderAnimation = false;
+            if (!isChangeByParamater)
+            {
+                await OnClose.InvokeAsync(this);
+                await Task.Delay(10);
+            }
+            await JsInvokeAsync(JSInteropConstants.EnableBodyScroll);
+        }
+
+        private void CalcAnimation()
+        {
+            switch (this.Placement)
+            {
+                case "left":
+                    _widthTransition = $"width 0s {Ease} {Duration}";
+                    break;
+
+                case "right":
+                    _widthTransition = $"width 0s {Ease} {Duration}";
+                    break;
+
+                case "top":
+                case "bottom":
+                    _heightTransition = $"height 0s {Ease} {Duration}";
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        private void CalcDrawerStyle()
+        {
+            string style = null;
+            if (_isOpen && _isRenderAnimation)
+            {
+                CalcAnimation();
+                if (string.IsNullOrWhiteSpace(_heightTransition))
+                {
+                    _heightTransition += ",";
+                }
+
+                style = $"transition:{_transformTransition} {_heightTransition} {_widthTransition};";
+            }
+            _drawerStyle = style;
+        }
+
+        internal async Task InvokeStateHasChangedAsync()
+        {
+            await InvokeAsync(StateHasChanged);
         }
     }
 }

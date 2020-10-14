@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
-namespace AntBlazor
+namespace AntDesign
 {
     public partial class PaginationOptions : AntDomComponentBase
     {
@@ -32,6 +32,8 @@ namespace AntBlazor
         [Parameter] public EventCallback<int> PageIndexChange { get; set; }
 
         [Parameter] public EventCallback<int> PageSizeChange { get; set; }
+
+        [CascadingParameter] public Pagination Pagination { get; set; }
 
         private string _inputValue;
 

@@ -1,0 +1,20 @@
+@namespace AntDesign
+@inherits AntDomComponentBase
+
+@if (_visible)
+{
+    <div class="@ClassMapper.Class" @onclick="_ => OnClickHandle()" style="@Style">
+        @if (ChildContent != null)
+        {
+            @ChildContent
+        }
+        else
+        {
+            <div class="@BackTopContentClassMapper.Class">
+                <div class="@BackTopIconClassMapper.Class">
+                    <Icon Type="@Icon" Theme="outline" />
+                </div>
+            </div>
+        }
+    </div>
+}

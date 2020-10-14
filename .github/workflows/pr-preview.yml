@@ -1,4 +1,4 @@
-name: Create Preview Pages
+name: 🔂 Surge PR Preview
 
 on:
   issue_comment:
@@ -41,7 +41,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 3.1.300
+          dotnet-version: 5.0.100-rc.2.20479.15
 
       - name: Setup Node.js
         uses: actions/setup-node@v1
@@ -57,9 +57,9 @@ jobs:
           git fetch origin pull/$PULL_NUMBER/head:fork
           git checkout fork
           npm install
-          cp -rf scripts/gh-pages/* scripts/gh-pages/.nojekyll scripts/gh-pages/.spa ./site/AntBlazor.Docs.Wasm/wwwroot
+          cp -rf scripts/gh-pages/* scripts/gh-pages/.nojekyll scripts/gh-pages/.spa ./site/AntDesign.Docs.Wasm/wwwroot
           dotnet build
-          dotnet publish -c Release -o cargo
+          dotnet publish ./site/AntDesign.Docs.Wasm -c Release -o cargo
 
       - name: Deploy Preview 🚀
         env:

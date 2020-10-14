@@ -1,0 +1,20 @@
+@namespace AntDesign
+@inherits AntDomComponentBase
+
+<CascadingValue Value="this">
+    <button class="@ClassMapper.Class" style="@(this.Danger ? this._btnWave + Style:Style)" id="@Id" type="@HtmlType"
+            @onclick="HandleOnClick" disabled="@Disabled"
+            @onmouseup="OnMouseUp"
+            ant-click-animating-without-extra-node="@(this._animating ? "true":"false")">
+        @if (Loading)
+        {
+            <Icon Type="loading"></Icon>
+        }
+        @if (!string.IsNullOrEmpty(Icon))
+        {
+            <Icon Type="@Icon" Style="@IconStyle"></Icon>
+        }
+
+        @ChildContent
+    </button>
+</CascadingValue>

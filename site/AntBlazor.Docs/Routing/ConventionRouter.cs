@@ -3,11 +3,11 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using AntBlazor.Docs.Localization;
+using AntDesign.Docs.Localization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 
-namespace AntBlazor.Docs.Routing
+namespace AntDesign.Docs.Routing
 {
     public class ConventionRouter : IComponent, IHandleAfterRender, IDisposable
     {
@@ -25,8 +25,6 @@ namespace AntBlazor.Docs.Routing
         [Parameter] public Assembly AppAssembly { get; set; }
 
         [Parameter] public string DefaultUrl { get; set; }
-
-        private static CultureInfo[] AllCultureInfos => CultureInfo.GetCultures(CultureTypes.AllCultures);
 
         public void Attach(RenderHandle renderHandle)
         {
@@ -50,20 +48,28 @@ namespace AntBlazor.Docs.Routing
             }
 
             RouteManager.Initialise(AppAssembly);
-            Refresh();
+
+            try
+            {
+                Refresh();
+            }
+            catch
+            {
+                // In the server prerendering mode, it will throw an expection.
+            }
 
             return Task.CompletedTask;
         }
 
-        public Task OnAfterRenderAsync()
+        public async Task OnAfterRenderAsync()
         {
             if (!_navigationInterceptionEnabled)
             {
                 _navigationInterceptionEnabled = true;
-                return NavigationInterception.EnableNavigationInterceptionAsync();
-            }
+                await NavigationInterception.EnableNavigationInterceptionAsync();
 
-            return Task.CompletedTask;
+                Refresh();
+            }
         }
 
         public void Dispose()
@@ -81,24 +87,30 @@ namespace AntBlazor.Docs.Routing
         {
             var relativeUri = NavigationManager.ToBaseRelativePath(_location);
 
+            relativeUri = relativeUri.IndexOf('#') >= 0 ? relativeUri.Substring(0, relativeUri.IndexOf('#')) : relativeUri;
+
             var currentCulture = LanguageService.CurrentCulture;
 
-            var segment = relativeUri.IndexOf('/') > 0 ? relativeUri.Substring(0, relativeUri.IndexOf('/')) : null;
+            var segment = relativeUri.IndexOf('/') > 0 ? relativeUri.Substring(0, relativeUri.IndexOf('/')) : relativeUri;
 
-            if (segment == null)
+            if (string.IsNullOrWhiteSpace(segment))
             {
                 NavigationManager.NavigateTo($"{currentCulture.Name}/{relativeUri}", true);
                 return;
             }
             else
             {
-                if (AllCultureInfos.Any(x => x.Name == segment))
+                if (segment.IsIn("zh-CN", "en-US"))
                 {
                     LanguageService.SetLanguage(CultureInfo.GetCultureInfo(segment));
                 }
-                else
+                else if (currentCulture.Name.IsIn("zh-CN", "en-US"))
                 {
                     NavigationManager.NavigateTo($"{currentCulture.Name}/{relativeUri}", true);
+                }
+                else
+                {
+                    NavigationManager.NavigateTo($"en-US/{relativeUri}", true);
                     return;
                 }
             }

@@ -1,54 +1,90 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AntDesign.core.Extensions;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
-namespace AntBlazor
+namespace AntDesign
 {
     public class IconService
     {
-        private static readonly ConcurrentDictionary<string, string> _svgCache = new ConcurrentDictionary<string, string>();
-        private readonly HttpClient _httpClient;
+        private static readonly ConcurrentDictionary<string, ValueTask<string>> _svgCache = new ConcurrentDictionary<string, ValueTask<string>>();
+        private static IDictionary<string, string[]> _iconfiles;
+        private readonly static HttpClient _httpClient = new HttpClient();
+        private IJSRuntime _js;
 
-        public IconService(HttpClient httpClient, NavigationManager navigationManager)
+        private Uri _baseAddress;
+
+        public IconService(NavigationManager navigationManager, IJSRuntime js)
         {
-#pragma warning disable CA1062
-            httpClient.BaseAddress = new Uri(navigationManager.BaseUri);
-#pragma warning restore CA1062
-            _httpClient = httpClient;
+            if (navigationManager != null)
+                _baseAddress = new Uri(navigationManager.BaseUri);
+
+            _js = js;
         }
 
         public async ValueTask<string> GetIconImg(string type, string theme)
         {
-            var iconImg = string.Empty;
-            if (_svgCache.TryGetValue($"{theme}-{type}", out var img))
+            if (!await IconExists(theme, type))
             {
-                iconImg = img;
+                return null;
             }
-            else
+
+            var cacheKey = $"{theme}/{type}";
+            var iconImg = await _svgCache.GetOrAdd(cacheKey, async key =>
             {
-                var res = await _httpClient.GetAsync($"_content/AntBlazor/icons/{theme}/{type}.svg");
+                var res = await _httpClient.GetAsync(new Uri(_baseAddress, $"_content/AntDesign/icons/{key}.svg"));
                 if (res.IsSuccessStatusCode)
                 {
-                    iconImg = await res.Content.ReadAsStringAsync();
-                    _svgCache.TryAdd($"{theme}-{type}", iconImg);
+                    return await res.Content.ReadAsStringAsync();
                 }
-            }
+
+                return null;
+            });
+
             return iconImg;
         }
 
-        public async ValueTask<string> GetIconSvg(string type, string theme, string width = "1em", string height = "1em", string fill = "currentColor")
+        public static string GetStyledSvg(string svgImg, string width = "1em", string height = "1em", string fill = "currentColor", int rotate = 0)
         {
-            var svgStyle = $"focusable=\"false\" width=\"{width}\" height=\"{height}\" fill=\"{fill}\"";
-
-            var svgImg = await GetIconImg(type, theme);
             if (!string.IsNullOrEmpty(svgImg))
             {
-                return svgImg.Insert(svgImg.IndexOf("svg", StringComparison.Ordinal) + 3, $" {svgStyle} ");
+                var svgStyle = $"focusable=\"false\" width=\"{width}\" height=\"{height}\" fill=\"{fill}\" {(rotate == 0 ? "" : $"style=\"transform: rotate({rotate}deg);\"")}";
+                return svgImg.Insert(svgImg.IndexOf("<svg", StringComparison.Ordinal) + 4, $" {svgStyle} ");
             }
 
-            return svgImg;
+            return null;
+        }
+
+        public async ValueTask CreateFromIconfontCN(string scriptUrl)
+        {
+            if (string.IsNullOrEmpty(scriptUrl))
+            {
+                return;
+            }
+
+            await _js.InvokeVoidAsync(JSInteropConstants.CreateIconFromfontCN, scriptUrl);
+        }
+
+        public async Task<IDictionary<string, string[]>> GetAllIcons()
+        {
+            _iconfiles ??= await _httpClient.GetFromJsonAsync<IDictionary<string, string[]>>(new Uri(_baseAddress, $"_content/AntDesign/icons/icons.json").ToString());
+            return _iconfiles;
+        }
+
+        public async ValueTask<bool> IconExists(string theme, string type)
+        {
+            _iconfiles ??= await GetAllIcons();
+
+            if (!_iconfiles.TryGetValue(theme, out var files))
+            {
+                return false;
+            }
+
+            return type.IsIn(files);
         }
     }
 }

@@ -1,9 +1,9 @@
-﻿@namespace AntBlazor
+﻿@namespace AntDesign
 @inherits OverlayTrigger
 
-@using AntBlazor.Internal
+@using AntDesign.Internal
 
-<div class="@ClassMapper.Class" @ref="@Ref" Id="@Id" style="display: inline-flex; @Style"
+<div class="@ClassMapper.Class" @ref="@Ref" Id="@Id" style="display: inline-block; @Style"
      @onclick="OnClickDiv"
      @onmouseenter="OnTriggerMouseEnter"
      @onmouseleave="OnTriggerMouseLeave"
@@ -19,22 +19,30 @@
         <Overlay @ref="_overlay"
                  HideMillisecondsDelay="10"
                  WaitForHideAnimMilliseconds="100"
-                 OverlayChildPrefixCls="@($"{PrefixCls}-menu")"
                  OnOverlayMouseEnter="OnOverlayMouseEnter"
                  OnOverlayMouseLeave="OnOverlayMouseLeave">
-            <div class="ant-tooltip-content">
-                <div class="ant-tooltip-arrow"></div>
-                <div class="ant-tooltip-inner" role="tooltip">
-                    @if(Title.IsT0)
-                    {
-                        @Title.AsT0;
-                    }
-                    else
-                    {
-                        @Title.AsT1;
-                    }
+            @if (Title.Value != null)
+            {
+                <div class="ant-tooltip-content">
+                    <div class="ant-tooltip-arrow">
+                        <span class="ant-tooltip-arrow-content"></span>
+                    </div>
+                    <div class="ant-tooltip-inner" role="tooltip">
+                        @if (Title.IsT0 && !string.IsNullOrWhiteSpace(Title.AsT0))
+                        {
+                            @Title.AsT0
+                        }
+                        else if (Title.IsT1)
+                        {
+                            @Title.AsT1
+                        }
+                        else if (Title.IsT2)
+                        {
+                            @Title.AsT2
+                        }
+                    </div>
                 </div>
-            </div>
+            }
         </Overlay>
     </CascadingValue>
 </CascadingValue>

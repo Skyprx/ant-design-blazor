@@ -1,0 +1,93 @@
+@namespace AntDesign
+@using AntDesign.Internal
+@inherits SelectBase
+
+<CascadingValue Value=this>
+    <CascadingValue Value=@("ant-select-dropdown") Name="PrefixCls">
+        <div class="@ClassMapper.Class" style="@Style" id="@Id" title="@Title" tabindex="-1" @ref="Ref">
+            <OverlayTrigger @ref="@_dropDown"
+                            Visible="Open"
+                            Disabled="Disabled"
+                            Trigger="new TriggerType[] { TriggerType.Click }"
+                            HiddenMode
+                            OnMouseEnter=@(() => { OnMouseEnter?.Invoke(); })
+                            OnMouseLeave=@(() => { OnMouseLeave?.Invoke(); })
+                            OnVisibleChange="OnVisibleChange"
+                            PopupContainerSelector="@PopupContainerSelector"
+                            OverlayEnterCls="slide-up-enter slide-up-enter-active slide-up"
+                            OverlayLeaveCls="slide-up-leave slide-up-leave-active slide-up">
+                <Overlay>
+                    <div style="@_dropdownStyle">
+                        <div role="listbox" id="@(Id)_list" style="height: 0px; width: 0px; overflow: hidden;">
+                            @for (var i = 0; SelectOptions.Count > i; ++i)
+                            {
+                                var selectOption = SelectOptions[i];
+                                <div id="@(Id)_list_@(i)" role="option" aria-label="@selectOption.Value" aria-selected="@GetAriaSelected(selectOption)">@selectOption.Value</div>
+                            }
+                        </div>
+                        <div class="" style="max-height:256px; overflow-y:auto;">
+                            <div>
+                                <div class="" style="display: flex; flex-direction: column;">
+                                    @if (IsCreatedTagOption())
+                                    {
+                                        <SelectOption Value="@_searchValue" IsSearch="true">@_searchValue </SelectOption>
+                                    }
+
+                                    @ChildContent
+
+                                    @if (Options != null && Options.Any())
+                                    {
+                                        foreach (var option in Options)
+                                        {
+                                            <SelectOption Value="@option.Key">@option.Label</SelectOption>
+                                        }
+                                    }
+
+                                    @if (IsTagMode)
+                                    {
+                                        var tagOptions = new SortedSet<string>(_tagSelectOptions.Select(option => option.Value).Union(_tokenSelectOptions));
+                                        @foreach (var tag in tagOptions)
+                                        {
+                                            <SelectOption Value="@tag" IsTag="true">@tag </SelectOption>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        @if (IsEmptyOnSearch())
+                        {
+                            <div role="listbox" id="@(Id)_list" class="@ClassPrefix-item-empty">
+                                @if (NotFoundContent != null)
+                                {
+                                    @NotFoundContent
+                                }
+                                else
+                                {
+                                    <Empty Image="Empty.PRESENTED_IMAGE_SIMPLE" Small="true" />
+                                }
+                            </div>
+                        }
+
+                        @if (DropdownRender != null)
+                        {
+                            @DropdownRender(default, default);
+                        }
+                    </div>
+                </Overlay>
+                <ChildContent>
+                    <CascadingValue Value="this" Name=@("ParentSelect")>
+                        <SelectContent Prefix="@ClassPrefix"
+                                       SearchValue="@_searchValue"
+                                       IsOverlayShow="@_dropDown.IsOverlayShow()"
+                                       OnInput="OnInput"
+                                       Placeholder="@Placeholder"
+                                       ShowPlaceholder="@ShowPlaceholder"
+                                       GetOptionShowValue="GetShowValue"
+                                       OnRemoveSelected="OnRemoveSelected"
+                                       InputWidth="@_inputWidth" />
+                    </CascadingValue>
+                </ChildContent>
+            </OverlayTrigger>
+        </div>
+    </CascadingValue>
+</CascadingValue>

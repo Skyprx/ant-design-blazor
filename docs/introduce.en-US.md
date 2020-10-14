@@ -30,7 +30,7 @@ Following the Ant Design specification, we developed a Blazor Components library
 - 💕 Supports WebAssembly-based client-side and SignalR-based server-side UI event interaction.
 - 🎨 Supports Progressive Web Applications (PWA).
 - 🛡 Build with C#, a multi-paradigm static language for an efficient development experience.
-- ⚙️ NET Standard 2.1 based, with direct reference to the rich .NET ecosystem.
+- ⚙️ .NET Standard 2.1 based, with direct reference to the rich .NET ecosystem.
 - 🎁 Seamless integration with existing ASP.NET Core MVC and Razor Pages projects.
 
 ## 🌈 Online Examples
@@ -57,9 +57,8 @@ WebAssembly static hosting examples:
 
 ## 💿 Current Version
 
-- Development: [![AntBlazor](https://img.shields.io/nuget/v/AntBlazor.svg?color=red&style=flat-square)](https://www.nuget.org/packages/AntBlazor/)
-
-- 0.1.0：will be released after basic implementation of components
+- Release: [![AntDesign](https://img.shields.io/nuget/v/AntDesign.svg?color=red&style=flat-square)](https://www.nuget.org/packages/AntDesign/)
+- Development: [![AntDesign](https://img.shields.io/nuget/vpre/AntDesign.svg?color=red&style=flat-square)](https://www.nuget.org/packages/AntDesign/)
 
 ## 🎨 Design Specification
 
@@ -67,44 +66,82 @@ Regularly synchronize with Official Ant Design specifications, you can check the
 
 ## 📦 Installation Guide
 
-- Install [.NET Core SDK](https://dotnet.microsoft.com/download/dotnet-core/3.1) 3.1.300  or later
+- Install [.NET Core SDK](https://dotnet.microsoft.com/download/dotnet-core/3.1) 3.1.300 or later
 
-- Create Blazor WebAssembly Project
+### Create a new project from the dotnet new template
+
+We have provided the `dotnet new` template to create a [Boilerplate](https://github.com/ant-design-blazor/ant-design-pro-blazor) project out of the box：
+
+- Install the template
 
   ```bash
-  $ dotnet new blazorwasm -o MyAntBlazorApp
+  $ dotnet new --install AntDesign.Templates::0.1.0-*
   ```
+
+- Create the Boilerplate project with the template
+
+  ```bash
+  $ dotnet new antdesign -o MyAntDesignApp
+  ```
+
+Options for the template：
+
+| Options          | Description                                         | Type     | Default    |
+| ---------------- | -------------------------------------------- | ------ |  --------- |
+| `-f` \| `--full`  | If specified, generates all pages of ant design pro | bool  |  false    |
+| `-ho` \| `--host`   | Specify the hosting model  | 'wasm' \| 'server' \| 'hosted'    |'wasm'      |
+| `--no-restore` |  If specified, skips the automatic restore of the project on create  | bool    | false |
+
+
+
+### Import Ant Design Blazor into an existing project
 
 - Go to the project folder of the application and install the Nuget package reference
 
   ```bash
-  $ cd MyAntBlazorApp
-  $ dotnet add package AntBlazor --version 0.1.0-*
+  $ dotnet add package AntDesign --version 0.1.0-*
   ```
 
 - Register the services
 
   ```csharp
-  services.AddAntBlazor();
+  services.AddAntDesign();
   ```
 
-- Link the static files in `wwwroot/index.html` (WebAssembly) or `Pages/_Host.razor` (Server)
+- Link the static files in `wwwroot/index.html` (WebAssembly) or `Pages/_Host.cshtml` (Server)
 
   ```html
-  <link href="_content/AntBlazor/css/ant-design-blazor.css" rel="stylesheet" />
-  <script src="_content/AntBlazor/js/ant-design-blazor.js"></script>
+  <link href="_content/AntDesign/css/ant-design-blazor.css" rel="stylesheet" />
+  <script src="_content/AntDesign/js/ant-design-blazor.js"></script>
   ```
 
 - Add namespace in `_Imports.razor`
 
   ```csharp
-  @using AntBlazor
+  @using AntDesign
+  ```
+
+- To display the pop-up component dynamically, you need to add the `<AntContainer />` component in `App.razor`. 
+
+  ```
+  <Router AppAssembly="@typeof(MainLayout).Assembly">
+      <Found Context="routeData">
+          <RouteView RouteData="routeData" DefaultLayout="@typeof(MainLayout)" />
+      </Found>
+      <NotFound>
+          <LayoutView Layout="@typeof(MainLayout)">
+              <Result Status="404" />
+          </LayoutView>
+      </NotFound>
+  </Router>
+
+  <AntContainer />   <-- add this component ✨
   ```
 
 - Finally, it can be referenced in the `.razor' component!
 
   ```html
-  <AntButton Type="primary">Hello World!</AntButton>
+  <Button Type="primary">Hello World!</Button>
   ```
 
 ## 🔨 Local Development
@@ -143,7 +180,7 @@ If you would like to contribute, feel free to create a [Pull Request](https://gi
 
 If you encounter any problems in the process, feel free to ask for help via following channels. We also encourage experienced users to help newcomers.
 
-- [![Slack Group](https://img.shields.io/badge/Slack-AntBlazor-blue.svg?style=flat-square&logo=slack)](https://join.slack.com/t/antblazor/shared_invite/zt-cw1enker-xVw3s93cTf4uhY2lRGRyRw) (Chinese & English)
+- [![Slack Group](https://img.shields.io/badge/Slack-AntBlazor-blue.svg?style=flat-square&logo=slack)](https://join.slack.com/t/AntBlazor/shared_invite/zt-etfaf1ww-AEHRU41B5YYKij7SlHqajA) (Chinese & English)
 - [![Ding Talk Group](https://img.shields.io/badge/DingTalk-AntBlazor-blue.svg?style=flat-square)](https://h5.dingtalk.com/circle/healthCheckin.html?corpId=dingccf128388c3ea40eda055e4784d35b88&2f46=c9b80ba5&origin=11) (Chinese)
 
 <details>
@@ -153,4 +190,4 @@ If you encounter any problems in the process, feel free to ask for help via foll
 
 ## ☀️ License
 
-[![AntBlazor](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/ant-design-blazor/ant-design-blazor/blob/master/LICENSE)
+[![AntDesign](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/ant-design-blazor/ant-design-blazor/blob/master/LICENSE)

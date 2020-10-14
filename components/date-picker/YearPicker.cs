@@ -1,7 +1,7 @@
 ﻿
-namespace AntBlazor
+namespace AntDesign
 {
-    public class YearPicker : DatePicker
+    public class YearPicker<TValue> : DatePicker<TValue>
     {
         public YearPicker()
         {

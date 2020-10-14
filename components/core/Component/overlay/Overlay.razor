@@ -1,7 +1,7 @@
-﻿@namespace AntBlazor.Internal
+﻿@namespace AntDesign.Internal
 @inherits AntDomComponentBase
 
-@if (_hasAddOverlayToBody == true || _isWaitForOverlayFirstRender)
+@if (_hasAddOverlayToBody == true || _isWaitForOverlayFirstRender || HiddenMode)
 {
     string display = GetDisplayStyle();
     string overlayCls = GetOverlayCls();
@@ -10,16 +10,33 @@
          style="position: absolute; @display @Trigger.OverlayStyle @_overlayStyle"
          @ref="Ref"
          @onmouseenter="OnOverlayMouseEnter"
-         @onmouseleave="OnOverlayMouseLeave">
-        <CascadingValue Value="Trigger" Name="ParentTrigger">
-            <CascadingValue Value="OverlayChildPrefixCls" Name="PrefixCls">
-                @if (ChildContent != null)
+         @onmouseleave="OnOverlayMouseLeave"
+         @onclick:stopPropagation>
+        <CascadingValue Value="this" Name="Overlay">
+            <CascadingValue Value="Trigger" Name="ParentTrigger">
+                @if (!string.IsNullOrEmpty(OverlayChildPrefixCls))
                 {
-                    @ChildContent
+                    <CascadingValue Value="OverlayChildPrefixCls" Name="PrefixCls">
+                        @if (ChildContent != null)
+                        {
+                            @ChildContent
+                        }
+                        else
+                        {
+                            @Trigger.Overlay
+                        }
+                    </CascadingValue>
                 }
                 else
                 {
-                    @Trigger.Overlay
+                    @if (ChildContent != null)
+                    {
+                        @ChildContent
+                    }
+                    else
+                    {
+                        @Trigger.Overlay
+                    }
                 }
             </CascadingValue>
         </CascadingValue>

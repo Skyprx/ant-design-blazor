@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-namespace AntBlazor
+namespace AntDesign
 {
     public abstract class AntComponentBase : ComponentBase, IDisposable
     {
@@ -55,6 +55,17 @@ namespace AntBlazor
         protected void InvokeStateHasChanged()
         {
             InvokeAsync(() =>
+            {
+                if (!IsDisposed)
+                {
+                    StateHasChanged();
+                }
+            });
+        }
+
+        protected async Task InvokeStateHasChangedAsync()
+        {
+            await InvokeAsync(() =>
             {
                 if (!IsDisposed)
                 {

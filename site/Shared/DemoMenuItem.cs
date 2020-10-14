@@ -1,4 +1,4 @@
-﻿namespace AntBlazor.Docs
+﻿namespace AntDesign.Docs
 {
     public class DemoMenuItem
     {
@@ -11,6 +11,8 @@
         public string Type { get; set; }
 
         public string Url { get; set; }
+
+        public string Cover { get; set; }
 
         public DemoMenuItem[] Children { get; set; }
     }

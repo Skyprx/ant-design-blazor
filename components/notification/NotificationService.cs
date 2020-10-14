@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
-namespace AntBlazor
+namespace AntDesign
 {
     /// <summary>
     /// AntNotification Service
@@ -24,16 +24,16 @@ namespace AntBlazor
         /// Open a notification box
         /// </summary>
         /// <param name="config"></param>
-        public async Task Open([NotNull]NotificationConfig config)
+        public async Task Open([NotNull] NotificationConfig config)
         {
             if (config == null)
             {
                 throw new ArgumentNullException(nameof(config));
             }
-            var task = OnNoticing?.Invoke(config);
-            if (task != null)
+
+            if (OnNoticing != null)
             {
-                await task;
+                await OnNoticing.Invoke(config);
             }
         }
 
@@ -107,8 +107,10 @@ namespace AntBlazor
         /// <returns></returns>
         public async Task Close(string key)
         {
-            var task = OnClosing?.Invoke(key);
-            if (task != null) await task;
+            if (OnClosing != null)
+            {
+                await OnClosing.Invoke(key);
+            }
         }
 
         /// <summary>

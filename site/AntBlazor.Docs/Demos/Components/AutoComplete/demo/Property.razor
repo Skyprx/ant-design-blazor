@@ -1,0 +1,43 @@
+﻿<AutoComplete @bind-Value="@value"
+              Options="@options"
+              Backfill="@switchBackfill"
+              DefaultActiveFirstOption="@switchDefaultActiveFirstOption"
+              Width="120"
+              OnPanelVisibleChange="OnPanelVisibleChange"
+              Disabled="@disabled" />
+<Divider Text="Properties"></Divider>
+
+<div>
+    <Switch @bind-Value="switchBackfill" />Backfill
+    <br />
+    <Switch @bind-Value="switchDefaultActiveFirstOption" />DefaultActiveFirstOption
+    <br />
+    <Switch @bind-Value="disabled" />Disabled
+</div>
+
+<Divider></Divider>
+<span>bind-Value:@value</span>
+
+
+@code
+{
+    private string value;
+
+    List<AutoCompleteDataItem> options = new List<AutoCompleteDataItem>() {
+        new AutoCompleteDataItem("Burns Bay Road","Burns Bay Road"),
+        new AutoCompleteDataItem("Downing Street","Downing Street"){ IsDisabled=true },
+        new AutoCompleteDataItem("Wall Street","Wall Street")
+        };
+
+    bool switchBackfill { get; set; } = false;
+
+    bool switchDefaultActiveFirstOption { get; set; } = true;
+
+    bool disabled { get; set; } = false;
+
+
+    private void OnPanelVisibleChange(bool visible)
+    {
+        Console.WriteLine(visible);
+    }
+}

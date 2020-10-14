@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Components.Web;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components.Routing;
 
-namespace AntBlazor
+namespace AntDesign
 {
     public partial class MenuItem : AntDomComponentBase
     {
@@ -28,10 +29,18 @@ namespace AntBlazor
         public bool Disabled { get; set; }
 
         [Parameter]
-        public EventCallback<MouseEventArgs> OnClicked { get; set; }
+        public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+        [Parameter]
+        public string RouterLink { get; set; }
+
+        [Parameter]
+        public NavLinkMatch RouterMatch { get; set; }
 
         public bool IsSelected { get; private set; }
         private string _key;
+
+        private int PaddingLeft => RootMenu.InternalMode == MenuMode.Inline ? ((ParentMenu?.Level ?? 0) + 1) * 24 : 0;
 
         private void SetClass()
         {
@@ -40,6 +49,12 @@ namespace AntBlazor
             ClassMapper.Add(prefixCls)
                 .If($"{prefixCls}-selected", () => IsSelected)
                 .If($"{prefixCls}-disabled", () => Disabled);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            RootMenu.MenuItems.Remove(this);
+            base.Dispose(disposing);
         }
 
         protected override void OnInitialized()
@@ -69,8 +84,8 @@ namespace AntBlazor
 
             RootMenu.SelectItem(this);
 
-            if (OnClicked.HasDelegate)
-                await OnClicked.InvokeAsync(args);
+            if (OnClick.HasDelegate)
+                await OnClick.InvokeAsync(args);
 
             if (ParentMenu == null)
                 return;

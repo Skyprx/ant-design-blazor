@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.JSInterop;
 
-namespace AntBlazor.JsInterop
+namespace AntDesign.JsInterop
 {
     public class InteropService
     {
@@ -15,7 +15,7 @@ namespace AntBlazor.JsInterop
 
         public async ValueTask Copy(string text)
         {
-            await this.JsInvokeAsync(JSInteropConstants.copy, text);
+            await this.JsInvokeAsync(JSInteropConstants.Copy, text);
         }
 
         private async Task<T> JsInvokeAsync<T>(string code, params object[] args)

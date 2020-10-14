@@ -43,7 +43,17 @@
       padding-bottom: 3px;
     }
   }
+
+  &-textarea {
+    &-show-count::after {
+      display: block;
+      color: @normal-color;
+      text-align: right;
+      content: attr(data-count);
+    }
+  }
 }
 
 @import './search-input';
 @import './rtl';
+@import './IE11';

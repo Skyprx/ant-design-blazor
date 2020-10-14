@@ -1,0 +1,21 @@
+@namespace AntDesign
+@typeparam TValue
+@inherits AntDomComponentBase
+
+<label @onclick="_=>OnClick()" class="@ClassMapper.Class" style="@Style" id="@Id" @ref="Ref">
+    <span class="@RadioClassMapper.Class">
+        <input type="radio"
+               autofocus="@AutoFocus"
+               class="@InputClassMapper.Class"
+               disabled="@Disabled"
+               checked="@IsChecked"
+               name="@_name"
+               @bind="@Value"
+               @ref="InputRef" />
+        <span class="@InnerClassMapper.Class"></span>
+    </span>
+    @if (ChildContent != null)
+    {
+        <span>@ChildContent</span>
+    }
+</label>

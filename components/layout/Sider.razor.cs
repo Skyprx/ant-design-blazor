@@ -1,51 +1,48 @@
 ﻿using System;
-using System.Collections;
 using System.Threading.Tasks;
-using AntBlazor.JsInterop;
+using AntDesign.JsInterop;
 using Microsoft.AspNetCore.Components;
 
-namespace AntBlazor
+namespace AntDesign
 {
-    public partial class Sider : AntDomComponentBase
+    public partial class Sider
     {
-        [Parameter]
-        public RenderFragment ChildContent { get; set; }
+        private static string _prefixCls = "ant-layout-sider";
 
-        [Parameter]
-        public string Width { get; set; } = "200";
+        [Parameter] public bool Collapsible { get; set; }
 
-        /// <summary>
-        ///  'light' | 'dark'
-        /// </summary>
-        [Parameter]
-        public string Theme { get; set; } = "dark";
-
-        [Parameter]
-        public int CollapsedWidth { get; set; } = 80;
+        [Parameter] public RenderFragment ChildContent { get; set; }
 
         /// <summary>
-        /// "xs" | "sm" | "md" | "lg" | "xl" | "xxl"
+        /// When Trigger is null, `OnCollapse` won't be invoked after `Collapsed` was changed.
         /// </summary>
-        [Parameter]
-        public string Breakpoint { get; set; }
+        [Parameter] public RenderFragment Trigger { get; set; }
+
+        [Parameter] public bool NoTrigger { get; set; }
+
+        [CascadingParameter] public Layout Parent { get; set; }
+
+        [Parameter] public BreakpointType Breakpoint { get; set; }
+
+        [Parameter] public SiderTheme Theme { get; set; } = SiderTheme.Dark;
+
+        [Parameter] public int Width { get; set; } = 200;
+
+        [Parameter] public int CollapsedWidth { get; set; } = 80;
 
         [Parameter]
-        public RenderFragment ZeroTrigger { get; set; }
+        public bool Collapsed
+        {
+            get => _isCollapsed;
+            set
+            {
+                if (_isCollapsed == value)
+                    return;
 
-        [Parameter]
-        public bool ReverseArrow { get; set; } = false;
-
-        [Parameter]
-        public bool Collapsible { get; set; } = false;
-
-        [Parameter]
-        public bool Collapsed { get; set; } = false;
-
-        [Parameter]
-        public RenderFragment Trigger { get; set; }
-
-        [CascadingParameter]
-        public Layout Layout { get; set; }
+                _isCollapsed = value;
+                OnCollapsed?.Invoke(_isCollapsed);
+            }
+        }
 
         [Parameter]
         public EventCallback<bool> OnCollapse { get; set; }
@@ -53,83 +50,108 @@ namespace AntBlazor
         [Parameter]
         public EventCallback<bool> OnBreakpoint { get; set; }
 
-        [Inject]
-        private DomEventService DomEventService { get; set; }
+        [Inject] public DomEventService DomEventService { get; set; }
 
-        protected string WidthSetting => this.Collapsed ? $"{this.CollapsedWidth}px" : StyleHelper.ToCssPixel(Width);
+        private int ComputedWidth => _isCollapsed ? CollapsedWidth : Width;
 
-        private string FlexSetting => $"0 0 {WidthSetting}";
-
+        /// <summary>
+        /// param1: collapsed or not
+        /// param2: call inside sider or not
+        /// </summary>
         public event Action<bool> OnCollapsed;
 
-        private string InternalStyle =>
-            $@"flex:{FlexSetting};
-               max-width:{WidthSetting};
-               min-width:{WidthSetting};
-               width:{WidthSetting};
-           ";
+        private bool _isCollapsed;
 
-        private bool Below { get; set; }
+        private string SiderStyles =>
+            $"flex: 0 0 {ComputedWidth}px;" +
+            $"max-width: {ComputedWidth}px;" +
+            $"min-width: {ComputedWidth}px;" +
+            $"width: {ComputedWidth}px;" +
+            (_isCollapsed ? "overflow:initial;" : "");
 
-        private readonly Hashtable _dimensionMap = new Hashtable()
+        private RenderFragment DefaultTrigger => builder =>
         {
-            ["xs"] = "480px",
-            ["sm"] = "576px",
-            ["md"] = "768px",
-            ["lg"] = "992px",
-            ["xl"] = "1200px",
-            ["xxl"] = "1600px"
+            builder.OpenComponent<Icon>(1);
+            builder.AddAttribute(2, "Type", _isCollapsed ? "right" : "left");
+            builder.AddAttribute(3, "Theme", "outline");
+            builder.CloseComponent();
         };
-
-        bool IsZeroTrigger => this.Collapsible && this.SiderTrigger != null && this.CollapsedWidth == 0 && ((this.Breakpoint != null && this.Below) || this.Breakpoint == null);
-
-        bool IsSiderTrigger => this.Collapsible && this.SiderTrigger != null && this.CollapsedWidth != 0;
-
-        RenderFragment SiderTrigger => Trigger ?? defaultTrigger(this);
 
         private void SetClass()
         {
-            var prefixCls = "ant-layout-sider";
-            ClassMapper.Add(prefixCls)
-                .If($"{prefixCls}-zero-width", () => Collapsed && CollapsedWidth == 0)
-                .If($"{prefixCls}-light", () => Theme == "light")
-                .If($"{prefixCls}-collapsed", () => Collapsed)
-                .If($"{prefixCls}-has-trigger", () => IsSiderTrigger)
-                ;
+            ClassMapper.Clear()
+                .Add(_prefixCls)
+                .If($"{_prefixCls}-dark", () => Theme == SiderTheme.Dark)
+                .If($"{_prefixCls}-light", () => Theme == SiderTheme.Light)
+                .If($"{_prefixCls}-has-trigger", () => Collapsible)
+                .If($"{_prefixCls}-collapsed", () => _isCollapsed)
+                .If($"{_prefixCls}-zero-width", () => CollapsedWidth == 0 && _isCollapsed);
         }
 
-        protected override async Task OnInitializedAsync()
+        protected override void OnInitialized()
         {
-            Layout?.HasSider();
+            base.OnInitialized();
+            Parent?.HasSider();
+
+            if (Trigger == null && !NoTrigger)
+            {
+                Trigger = DefaultTrigger;
+            }
+
             SetClass();
-            DomEventService.AddEventListener<object>("window", "resize", async _ => await WatchMatchMedia());
-            await base.OnInitializedAsync();
         }
 
-        protected override async Task OnFirstAfterRenderAsync()
+        protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            await WatchMatchMedia();
-            await base.OnFirstAfterRenderAsync();
+            await base.OnAfterRenderAsync(firstRender);
+            if (firstRender && Breakpoint != null)
+            {
+                var dimensions = await JsInvokeAsync<Window>(JSInteropConstants.GetWindow);
+                DomEventService.AddEventListener<Window>("window", "resize", OnResize, false);
+                OptimizeSize(dimensions.innerWidth);
+            }
         }
 
-        public async Task ToggleCollapse()
+        private void OnResize(Window window)
         {
-            this.Collapsed = !this.Collapsed;
-            await OnCollapse.InvokeAsync(Collapsed);
-            OnCollapsed?.Invoke(this.Collapsed);
+            OptimizeSize(window.innerWidth);
         }
 
-        public async Task WatchMatchMedia()
+        private void ToggleCollapsed()
         {
-            if (string.IsNullOrEmpty(Breakpoint))
-                return;
+            _isCollapsed = !_isCollapsed;
+            OnCollapsed?.Invoke(_isCollapsed);
 
-            bool matchBelow = await JsInvokeAsync<bool>(JSInteropConstants.matchMedia, $"(max-width: {_dimensionMap[Breakpoint]})");
-            this.Below = matchBelow;
-            this.Collapsed = matchBelow;
-            await this.OnCollapse.InvokeAsync(matchBelow);
-            OnCollapsed?.Invoke(this.Collapsed);
-            await OnBreakpoint.InvokeAsync(matchBelow);
+            if (OnCollapse.HasDelegate)
+            {
+                OnCollapse.InvokeAsync(_isCollapsed);
+            }
+        }
+
+        private void OptimizeSize(decimal windowWidth)
+        {
+            if (windowWidth < Breakpoint?.Width)
+            {
+                _isCollapsed = true;
+                OnBreakpoint.InvokeAsync(true);
+            }
+            else
+                _isCollapsed = false;
+
+            OnCollapsed?.Invoke(_isCollapsed);
+            if (OnCollapse.HasDelegate)
+            {
+                OnCollapse.InvokeAsync(_isCollapsed);
+            }
+
+            StateHasChanged();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            DomEventService.RemoveEventListerner<Window>("window", "resize", OnResize);
         }
     }
 }

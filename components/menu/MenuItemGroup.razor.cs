@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using OneOf;
 
-namespace AntBlazor
+namespace AntDesign
 {
     public partial class MenuItemGroup : AntDomComponentBase
     {
@@ -14,7 +14,10 @@ namespace AntBlazor
         }
 
         [Parameter]
-        public OneOf<string, RenderFragment> Title { get; set; }
+        public string Title { get; set; }
+
+        [Parameter]
+        public RenderFragment TitleTemplate { get; set; }
 
         [Parameter]
         public RenderFragment ChildContent { get; set; }

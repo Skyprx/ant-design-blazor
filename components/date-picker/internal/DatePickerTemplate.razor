@@ -1,10 +1,15 @@
-﻿@namespace AntBlazor.Internal
-@inherits DatePickerPanelBase
+﻿@namespace AntDesign.Internal
+@typeparam TValue
+@inherits DatePickerPanelBase<TValue>
+@using AntDesign
 
-<div class="@(DatePicker.PrefixCls)-@(Picker)-panel">
-    @RenderPickerHeader
-    <div class="@(DatePicker.PrefixCls)-body">
-        <table class="@(DatePicker.PrefixCls)-content">
+<div class="@(PrefixCls)-@(Picker)-panel">
+    @if (IsShowHeader)
+    {
+        @RenderPickerHeader
+    }
+    <div class="@(PrefixCls)-body">
+        <table class="@(PrefixCls)-content">
             <thead>
                 @RenderTableHeader
             </thead>
@@ -22,31 +27,56 @@
                         {
                             var currentColDate = startDate;
 
-                            string inViewCls = IsInView(currentColDate) ? $"{DatePicker.PrefixCls}-cell-in-view" : "";
-                            string todayCls = IsToday(currentColDate) ? $"{DatePicker.PrefixCls}-cell-today" : "";
-                            string selectedCls = IsSelected(currentColDate) ? $"{DatePicker.PrefixCls}-cell-selected" : "";
-                            string disabledCls = "";
-
-                            if (DatePicker.DisabledDate != null && DatePicker.DisabledDate(currentColDate))
-                            {
-                                disabledCls = $"{DatePicker.PrefixCls}-cell-disabled";
-                            }
+                            string cellCls = GetCellCls(currentColDate);
+                            string innerCellCls = GetInnerCellCls(currentColDate);
 
                             <td title="@GetColTitle?.Invoke(currentColDate)"
-                                class="@(DatePicker.PrefixCls)-cell @(inViewCls) @(todayCls) @selectedCls @disabledCls">
-                                <div class="@(DatePicker.PrefixCls)-cell-inner"
+                                class="@cellCls"
+                                @onmouseenter="e => DateOnMouseEnter(currentColDate)"
+                                @onmouseleave="e => DateOnMouseLeave()">
+                                <div class="@innerCellCls"
                                      @onclick="e => OnValueSelect?.Invoke(currentColDate)">
-                                    @if (Picker == DatePickerType.Date && DatePicker.DateRender != null)
+                                    @if (IsCalendar)
                                     {
-                                        @(DatePicker.DateRender(currentColDate, DatePicker.CurrentDate))
-                                    }
-                                    else if (Picker == DatePickerType.Month && DatePicker.MonthCellRender != null)
-                                    {
-                                        @(DatePicker.MonthCellRender(currentColDate))
+                                        <div class="@(PrefixCls)-calendar-date-value">
+                                            @if (Picker == DatePickerType.Date && DateRender != null)
+                                            {
+                                                @(DateRender(currentColDate, DatePicker.CurrentDate))
+                                            }
+                                            else if (Picker == DatePickerType.Month && MonthCellRender != null)
+                                            {
+                                                @(MonthCellRender(currentColDate))
+                                            }
+                                            else
+                                            {
+                                                @RenderColValue(currentColDate)
+                                            }
+                                        </div>
+                                        <div class="@(PrefixCls)-calendar-date-content">
+                                            @if (Picker == DatePickerType.Date && CalendarDateRender != null)
+                                            {
+                                                @(CalendarDateRender(currentColDate))
+                                            }
+                                            else if (Picker == DatePickerType.Month && CalendarMonthCellRender != null)
+                                            {
+                                                @(CalendarMonthCellRender(currentColDate))
+                                            }
+                                        </div>
                                     }
                                     else
                                     {
-                                        @RenderColValue(currentColDate)
+                                        @if (Picker == DatePickerType.Date && DateRender != null)
+                                        {
+                                            @(DateRender(currentColDate, DatePicker.CurrentDate))
+                                        }
+                                        else if (Picker == DatePickerType.Month && MonthCellRender != null)
+                                        {
+                                            @(MonthCellRender(currentColDate))
+                                        }
+                                        else
+                                        {
+                                            @RenderColValue(currentColDate)
+                                        }
                                     }
                                 </div>
                             </td>
@@ -62,56 +92,3 @@
         </table>
     </div>
 </div>
-
-@code {
-    [Parameter]
-    public RenderFragment RenderPickerHeader { get; set; }
-
-    [Parameter]
-    public RenderFragment RenderTableHeader { get; set; }
-
-    [Parameter]
-    public RenderFragment<DateTime> RenderFisrtCol { get; set; }
-
-    [Parameter]
-    public RenderFragment<DateTime> RenderColValue { get; set; }
-
-    [Parameter]
-    public RenderFragment<DateTime> RenderLastCol { get; set; }
-
-    [Parameter]
-    public DateTime ViewStartDate { get; set; }
-
-    [Parameter]
-    public Func<DateTime, string> GetColTitle { get; set; }
-
-    [Parameter]
-    public Func<DateTime, string> GetRowClass { get; set; }
-
-    [Parameter]
-    public Func<DateTime, DateTime> GetNextColValue { get; set; }
-
-    [Parameter]
-    public Func<DateTime, bool> IsInView { get; set; }
-
-    [Parameter]
-    public Func<DateTime, bool> IsToday { get; set; }
-
-    [Parameter]
-    public Func<DateTime, bool> IsSelected { get; set; }
-
-    [Parameter]
-    public Action<DateTime> OnRowSelect { get; set; }
-
-    [Parameter]
-    public Action<DateTime> OnValueSelect { get; set; }
-
-    [Parameter]
-    public bool ShowFooter { get; set; } = false;
-
-    [Parameter]
-    public int MaxRow { get; set; } = 0;
-
-    [Parameter]
-    public int MaxCol { get; set; } = 0;
-}

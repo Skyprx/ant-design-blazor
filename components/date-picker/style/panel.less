@@ -590,18 +590,28 @@
     .@{picker-prefix-cls}-content {
       display: flex;
       flex: auto;
-      height: 224px;
+      height: @picker-time-panel-column-height;
     }
 
     &-column {
       flex: 1 0 auto;
-      width: 56px;
+      width: @picker-time-panel-column-width;
       margin: 0;
-      padding: 0 0 194px 0;
+      padding: 0;
       overflow-y: hidden;
       text-align: left;
       list-style: none;
       transition: background @animation-duration-slow;
+
+      &::after {
+        display: block;
+        height: @picker-time-panel-column-height - @picker-time-panel-cell-height;
+        content: '';
+        .@{picker-prefix-cls}-datetime-panel & {
+          height: @picker-time-panel-column-height - @picker-time-panel-cell-height + 2 *
+            @border-width-base;
+        }
+      }
 
       &:not(:first-child) {
         border-left: @border-width-base @border-style-base @picker-border-color;
@@ -625,10 +635,9 @@
             width: 100%;
             height: @picker-time-panel-cell-height;
             margin: 0;
-            padding: 0;
+            padding: 0 0 0 ((@picker-time-panel-column-width - 28px) / 2);
             color: @text-color;
             line-height: @picker-time-panel-cell-height;
-            text-align: center;
             border-radius: 0;
             cursor: pointer;
             transition: background @animation-duration-slow;

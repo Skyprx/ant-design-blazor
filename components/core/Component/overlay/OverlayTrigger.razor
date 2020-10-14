@@ -1,8 +1,12 @@
-﻿@namespace AntBlazor.Internal
+﻿@namespace AntDesign.Internal
 @inherits AntDomComponentBase
 
+@{
+    string inlineFlexDisplay = InlineFlexMode ? "display: inline-flex;" : "";
+}
+
 <div class="@ClassMapper.Class"
-     style="display: inline-flex; @Style"
+     style="@inlineFlexDisplay @Style"
      id="@Id"
      @ref="@Ref"
      @onclick="OnClickDiv"
@@ -17,7 +21,9 @@
 
 <CascadingValue Value="this" Name="Trigger">
     <Overlay @ref="_overlay"
-             OverlayChildPrefixCls="@($"{PrefixCls}-menu")"
+             HiddenMode="HiddenMode"
+             OnShow="OnOverlayShow"
+             OnHide="OnOverlayHide"
              OnOverlayMouseEnter="OnOverlayMouseEnter"
              OnOverlayMouseLeave="OnOverlayMouseLeave" />
 </CascadingValue>

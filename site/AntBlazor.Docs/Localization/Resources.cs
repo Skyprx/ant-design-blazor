@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using YamlDotNet.Serialization;
+﻿using System;
+using System.Collections.Generic;
 
-namespace AntBlazor.Docs.Localization
+namespace AntDesign.Docs.Localization
 {
     public class Resources
     {
-        private Dictionary<string, string> _keyValues = null;
+        private IDictionary<string, string> _keyValues = null;
 
         public Resources(string languageContent)
         {
@@ -15,7 +14,7 @@ namespace AntBlazor.Docs.Localization
 
         private void Initialize(string languageContent)
         {
-            _keyValues = new Deserializer().Deserialize<Dictionary<string, string>>(languageContent).Select(k => new { Key = k.Key.ToLower(), Value = k.Value }).ToDictionary(t => t.Key, t => t.Value);
+            _keyValues = System.Text.Json.JsonSerializer.Deserialize<IDictionary<string, string>>(languageContent);
         }
 
         public string this[string key]
@@ -26,8 +25,9 @@ namespace AntBlazor.Docs.Localization
                 {
                     return _keyValues[key.ToLower()];
                 }
-                catch
+                catch (Exception e)
                 {
+                    Console.WriteLine(e.Message);
                     return key;
                 }
             }

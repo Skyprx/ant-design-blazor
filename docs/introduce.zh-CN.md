@@ -54,9 +54,9 @@ title: Ant Design of Blazor
 
 ## 💿 当前版本
 
-- 开发构建： [![AntBlazor](https://img.shields.io/nuget/v/AntBlazor.svg?color=red&style=flat-square)](https://www.nuget.org/packages/AntBlazor/)
+- 正式发布: [![AntDesign](https://img.shields.io/nuget/v/AntDesign.svg?color=red&style=flat-square)](https://www.nuget.org/packages/AntDesign/)
+- 开发构建： [![AntDesign](https://img.shields.io/nuget/vpre/AntDesign.svg?color=red&style=flat-square)](https://www.nuget.org/packages/AntDesign/)
 
-- 0.1.0：基本实现组件后发布
 
 ## 🎨 设计规范
 
@@ -66,42 +66,78 @@ title: Ant Design of Blazor
 
 - 先安装 [.NET Core SDK](https://dotnet.microsoft.com/download/dotnet-core/3.1) 3.1.300 以上版本
 
-- 创建 Blazor WebAssembly 项目
+### 从模板创建一个新项目
 
+我们提供了 `dotnet new` 模板来创建一个开箱即用的 [Ant Design Pro](https://github.com/ant-design-blazor/ant-design-pro-blazor) 新项目：
+
+- 安装模板
+
+  ```bash
+  $ dotnet new --install AntDesign.Templates::0.1.0-*
   ```
-  $ dotnet new blazorwasm -o MyAntBlazorApp
+
+- 从模板创建 Ant Design Blazor Pro 项目
+
+  ```bash
+  $ dotnet new antdesign -o MyAntDesignApp
   ```
+
+模板的参数：
+
+| 参数             | 说明                                         | 类型          | 认  值    |
+| ---------------- | -------------------------------------------- | ------------- |  --------- |
+| `-f` \| `--full`  | 如果设置这个参数，会生成所有 Ant Design Pro 页面  | bool      |  false    |
+| `-ho` \| `--host`   | 指定托管模型  | 'wasm' \| 'server' \| 'hosted'        | 'wasm'      |
+| `--no-restore` | 如果设置这个参数，就不会自动恢复包引用         | bool       | false |
+
+### 在已有项目中引入 Ant Design Blazor
 
 - 进入应用的项目文件夹，安装 Nuget 包引用
 
   ```bash
-  $ cd MyAntBlazorApp
-  $ dotnet add package AntBlazor --version 0.1.0-*
+  $ dotnet add package AntDesign --version 0.1.0-*
   ```
 
 - 在项目中注册:
 
   ```
-  services.AddAntBlazor();
+  services.AddAntDesign();
   ```
 
-- 在 `wwwroot/index.html`(WebAssembly) 或 `Pages/_Host.razor`(Server) 中引入静态文件:
+- 在 `wwwroot/index.html`(WebAssembly) 或 `Pages/_Host.cshtml`(Server) 中引入静态文件:
 
   ```
-    <link href="_content/AntBlazor/css/ant-design-blazor.css" rel="stylesheet">
-    <script src="_content/AntBlazor/js/ant-design-blazor.js"></script>
+    <link href="_content/AntDesign/css/ant-design-blazor.css" rel="stylesheet">
+    <script src="_content/AntDesign/js/ant-design-blazor.js"></script>
   ```
 
 - 在 `_Imports.razor` 中加入命名空间
 
   ```
-  @using AntBlazor
+  @using AntDesign
+  ```
+
+- 为了动态地显示弹出组件，需要在 `App.razor` 中添加一个 `<AntContainer />` 组件。
+
+  ```
+  <Router AppAssembly="@typeof(MainLayout).Assembly">
+      <Found Context="routeData">
+          <RouteView RouteData="routeData" DefaultLayout="@typeof(MainLayout)" />
+      </Found>
+      <NotFound>
+          <LayoutView Layout="@typeof(MainLayout)">
+              <Result Status="404" />
+          </LayoutView>
+      </NotFound>
+  </Router>
+
+  <AntContainer />   <-- 在这里添加 ✨
   ```
 
 - 最后就可以在`.razor`组件中引用啦！
 
   ```
-  <AntButton Type="primary">Hello World!</AntButton>
+  <Button Type="primary">Hello World!</Button>
   ```
 
 ## 🔨 本地开发
@@ -144,4 +180,4 @@ title: Ant Design of Blazor
 
 ## ☀️ 授权协议
 
-[![AntBlazor](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/ant-design-blazor/ant-design-blazor/blob/master/LICENSE)
+[![AntDesign](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/ant-design-blazor/ant-design-blazor/blob/master/LICENSE)

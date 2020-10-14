@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 
-namespace AntBlazor
+namespace AntDesign
 {
     public class DropdownButton : Dropdown
     {
@@ -34,7 +34,7 @@ namespace AntBlazor
             }
         }
 
-        private string _type = AntButtonType.Default;
+        private string _type = ButtonType.Default;
         [Parameter]
         public string Type
         {
@@ -52,7 +52,6 @@ namespace AntBlazor
         public DropdownButton()
         {
             IsButton = true;
-            Trigger = new TriggerType[] { TriggerType.Click };
         }
     }
 }

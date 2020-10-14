@@ -6,6 +6,18 @@
   // ================================================================
   /* Some non-status related component style is in `components.less` */
 
+  // ========================= Explain =========================
+  /* To support leave along ErrorList. We add additional className to handle explain style */
+  &-explain {
+    &&-error {
+      color: @error-color;
+    }
+
+    &&-warning {
+      color: @warning-color;
+    }
+  }
+
   &-has-feedback {
     // ========================= Input =========================
     .@{ant-prefix}-input {
@@ -34,12 +46,10 @@
     // Fix overlapping between feedback icon and <Select>'s arrow.
     // https://github.com/ant-design/ant-design/issues/4431
     > .@{ant-prefix}-select .@{ant-prefix}-select-arrow,
-    > .@{ant-prefix}-select .@{ant-prefix}-select-selection__clear,
+    > .@{ant-prefix}-select .@{ant-prefix}-select-clear,
     :not(.@{ant-prefix}-input-group-addon) > .@{ant-prefix}-select .@{ant-prefix}-select-arrow,
-    :not(.@{ant-prefix}-input-group-addon)
-      > .@{ant-prefix}-select
-      .@{ant-prefix}-select-selection__clear {
-      right: 28px;
+    :not(.@{ant-prefix}-input-group-addon) > .@{ant-prefix}-select .@{ant-prefix}-select-clear {
+      right: 32px;
     }
     > .@{ant-prefix}-select .@{ant-prefix}-select-selection-selected-value,
     :not(.@{ant-prefix}-input-group-addon)
@@ -51,10 +61,10 @@
     // ======================= Cascader ========================
     .@{ant-prefix}-cascader-picker {
       &-arrow {
-        margin-right: 17px;
+        margin-right: 19px;
       }
       &-clear {
-        right: 28px;
+        right: 32px;
       }
     }
 
@@ -234,12 +244,16 @@
         }
       }
     }
-  }
 
-  // Patch to keep error explain color
-  &-has-error-leave {
-    .@{form-item-prefix-cls}-explain {
-      color: @error-color;
+    // RadioGroup
+    .@{ant-prefix}-radio-button-wrapper {
+      border-color: @error-color !important;
+
+      &:not(:first-child) {
+        &::before {
+          background-color: @error-color;
+        }
+      }
     }
   }
 

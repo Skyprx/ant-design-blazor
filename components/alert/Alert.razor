@@ -1,0 +1,46 @@
+@namespace AntDesign
+@inherits AntDomComponentBase
+
+@if (!_isClosed)
+{
+    <div data-show="@(!_isClosing||_isClosed?"true":"false")" class="@ClassMapper.Class" style="@_innerStyle @Style " Id="@Id" @ref="Ref">
+        @if (ShowIcon)
+        {
+            @if (Icon!=null)
+            {
+                <div class="ant-alert-icon">
+                    @Icon
+                </div>
+            }
+            else
+            {
+                <Icon Type="@IconType" Theme="@(string.IsNullOrWhiteSpace(Description)?"fill":"outline")" Class="ant-alert-icon" />
+            }
+        }
+        @if (!string.IsNullOrEmpty(Message))
+        {
+            <span class="ant-alert-message">@Message</span>
+        }
+        @if (!string.IsNullOrEmpty(Description))
+        {
+            <span class="ant-alert-description">@Description</span>
+        }
+        @if (ChildContent != null)
+        {
+            <span class="ant-alert-description">@ChildContent</span>
+        }
+        @if (Closable)
+        {
+            <button type="button" class="ant-alert-close-icon" tabindex="0" @onclick="@OnCloseHandler">
+                @if (!string.IsNullOrEmpty(CloseText))
+                {
+                    <span class="ant-alert-close-text">@CloseText</span>
+                }
+                else
+                {
+                    <Icon Type="close"/>
+                }
+            </button>
+        }
+    </div>
+}

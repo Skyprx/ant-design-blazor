@@ -1,7 +1,7 @@
 ﻿
-namespace AntBlazor
+namespace AntDesign
 {
-    public class QuarterPicker : DatePicker
+    public class QuarterPicker<TValue> : DatePicker<TValue>
     {
         public QuarterPicker()
         {

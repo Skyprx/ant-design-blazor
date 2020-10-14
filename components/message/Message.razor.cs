@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 
-namespace AntBlazor
+namespace AntDesign
 {
     public partial class Message
     {
@@ -147,10 +147,9 @@ namespace AntBlazor
                     {
                         _configDict.Remove(config.Key);
                         _configs.Remove(config);
+                        InvokeAsync(StateHasChanged);
                     }, TaskScheduler.Current);
 
-                //when next message item fade out or add new message item, item will toggle StateHasChanged
-                //StateHasChanged();
             }
 
             return Task.CompletedTask;

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
-namespace AntBlazor
+namespace AntDesign
 {
     public partial class PaginationItem : AntDomComponentBase
     {
@@ -73,10 +70,10 @@ namespace AntBlazor
             _title = this.Type switch
             {
                 "page" => $"{this.Index}",
-                "next" => "下一页",
-                "prev" => "上一页",
-                "prev_5" => "向前5页",
-                "next_5" => "向后5页",
+                "next" => Pagination.Locale.NextPage,
+                "prev" => Pagination.Locale.PrevPage,
+                "prev_5" => Pagination.Locale.Prev5,
+                "next_5" => Pagination.Locale.Next5,
                 _ => ""
             };
 

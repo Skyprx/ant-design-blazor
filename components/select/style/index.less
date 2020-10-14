@@ -28,7 +28,7 @@
     }
   }
 
-  .@{select-prefix-cls}-focused& {
+  .@{select-prefix-cls}-focused:not(.@{select-prefix-cls}-disabled)& {
     .active();
   }
 
@@ -46,9 +46,17 @@
 /* Reset search input style */
 .select-search-input-without-border() {
   .@{select-prefix-cls}-selection-search-input {
+    margin: 0;
+    padding: 0;
     background: transparent;
     border: none;
     outline: none;
+    appearance: none;
+
+    &::-webkit-search-cancel-button {
+      display: none;
+      -webkit-appearance: none;
+    }
   }
 }
 
@@ -82,9 +90,9 @@
   &-selection-placeholder {
     flex: 1;
     overflow: hidden;
+    color: @input-placeholder-color;
     white-space: nowrap;
     text-overflow: ellipsis;
-    opacity: 0.4;
 
     // IE11 css hack. `*::-ms-backdrop,` is a must have
     @media all and (-ms-high-contrast: none) {
@@ -118,9 +126,13 @@
         vertical-align: top;
       }
 
-      &:not(.@{iconfont-css-prefix}-down) {
+      &:not(.@{select-prefix-cls}-suffix) {
         pointer-events: auto;
       }
+    }
+
+    .@{select-prefix-cls}-disabled & {
+      cursor: not-allowed;
     }
   }
 
@@ -198,6 +210,10 @@
     &-hidden {
       display: none;
     }
+
+    &-empty {
+      color: @disabled-color;
+    }
   }
 
   // ========================= Options =========================
@@ -214,6 +230,7 @@
 
   &-item-empty {
     .item();
+    color: @disabled-color;
   }
 
   &-item {
@@ -249,7 +266,7 @@
       }
 
       &-selected:not(&-disabled) {
-        color: @text-color;
+        color: @select-item-selected-color;
         font-weight: @select-item-selected-font-weight;
         background-color: @select-item-selected-bg;
 

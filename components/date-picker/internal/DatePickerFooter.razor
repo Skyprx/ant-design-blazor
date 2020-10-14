@@ -1,11 +1,14 @@
-﻿@namespace AntBlazor.Internal
+﻿@namespace AntDesign.Internal
+@typeparam TValue
 
 <div class="@(DatePicker.PrefixCls)-footer">
-    <a class="@(DatePicker.PrefixCls)-today-btn" @onclick="e => DatePicker.ChangePickerValue(DateTime.Now)">今天</a>
+    <a class="@(DatePicker.PrefixCls)-today-btn" @onclick="e => DatePicker.ChangePickerValue(DateTime.Now)">
+        @this.DatePicker.CultureInfo.GetDateLocale().Today
+    </a>
 </div>
 
 @code {
     [CascadingParameter]
-    public DatePicker DatePicker { get; set; }
+    public DatePicker<TValue> DatePicker { get; set; }
 
 }
